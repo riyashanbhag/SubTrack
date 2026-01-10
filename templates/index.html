@@ -4,6 +4,8 @@
     <title>SubTrack – Subscription Tracking & Management System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
     <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -58,7 +60,13 @@
         <form method="POST" action="/add" class="form">
             <input type="text" name="name" placeholder="Netflix, Spotify…" required>
             <input type="number" name="cost" placeholder="Monthly cost (₹)" required>
-            <input type="date" name="next_billing" required>
+<div class="input-group">
+    <label>Next billing date</label>
+    <div class="date-wrapper">
+        <input type="date" name="next_billing" required>
+        
+    </div>
+</div>
 
             <select name="usage_feel" required>
                 <option value="">How has your usage been?</option>
@@ -105,11 +113,11 @@
 
                     <div class="time-hint">
                         {% if sub.days_left <= 5 %}
-                            ⏰ Very soon
+                             Very soon
                         {% elif sub.days_left <= 10 %}
-                            ⏳ Coming up
+                             Coming up
                         {% else %}
-                            🗓️ Later
+                             Later
                         {% endif %}
                     </div>
 

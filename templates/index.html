@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SubTrack – Subscription Tracking & Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-left">
+        <h1>SubTrack</h1>
+        <p class="hero-tagline">Track all your subscriptions in one place</p>
+        <p class="hero-desc">
+            Stay aware of upcoming billing dates and manage subscriptions effortlessly.
+        </p>
+    </div>
+
+    <div class="hero-right">
+        <div class="floating-card"><i class="fa-solid fa-calendar-week"></i> Billing reminders</div>
+        <div class="floating-card"><i class="fa-regular fa-credit-card"></i> Monthly spend</div>
+        <div class="floating-card">📊 Subscription overview</div>
+    </div>
+</section>
+
+<div class="container">
+
+    <!-- DASHBOARD -->
+    <div class="dashboard">
+        <div class="dash-card blue">
+            <span><img src="../static/images/calendar.png" alt="calendar" width="20px"></span>
+            <h3>Next Billing</h3>
+            <p>{{ next_billing }}</p>
+        </div>
+
+        <div class="dash-card green">
+            <span><img src="../static/images/money.png" alt="calendar" width="20px"></span>
+            <h3>Total Spend</h3>
+            <p>₹{{ total_spend }}</p>
+        </div>
+
+        
+
+        <div class="dash-card purple">
+            <span><img src="../static/images/usage.png" alt="calendar" width="20px"></span>
+            <h3>Low Usage</h3>
+            <p>{{ low_usage }}</p>
+        </div>
+    </div>
+
+    <!-- ADD -->
+    <div class="glass-card">
+        <h2> Add another subscription</h2>
+        <form method="POST" action="/add" class="form">
+            <input type="text" name="name" placeholder="Netflix, Spotify…" required>
+            <input type="number" name="cost" placeholder="Monthly cost (₹)" required>
+            <input type="date" name="next_billing" required>
+
+            <select name="usage_feel" required>
+                <option value="">How has your usage been?</option>
+                <option value="high">Used a lot</option>
+                <option value="medium">Used occasionally</option>
+                <option value="low">Barely / not used</option>
+            </select>
+
+            <button>Add subscription</button>
+        </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="glass-card">
+        <h2><img src="../static/images/subscription.png"width="20px" alt=""> Your subscriptions</h2>
+
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Cost</th>
+                <th>Next Billing</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Delete</th>
+            </tr>
+
+            {% if subscriptions|length == 0 %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        📭 No subscriptions yet
+                        <span>Add one to start tracking</span>
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
+
+            {% for sub in subscriptions %}
+            <tr>
+                <td>{{ sub.name }}</td>
+                <td>₹{{ sub.cost }}</td>
+                <td>
+                    {{ sub.next_billing }}
+
+                    <div class="time-hint">
+                        {% if sub.days_left <= 5 %}
+                            ⏰ Very soon
+                        {% elif sub.days_left <= 10 %}
+                            ⏳ Coming up
+                        {% else %}
+                            🗓️ Later
+                        {% endif %}
+                    </div>
+
+                    <div class="progress">
+                        <div class="bar
+                            {% if sub.days_left <= 5 %}
+                                urgent
+                            {% elif sub.days_left <= 10 %}
+                                warning
+                            {% else %}
+                                safe
+                            {% endif %}
+                        "></div>
+                    </div>
+                </td>
+                <td>
+                    {% if sub.status == "needs-attention" %}
+                        <span class="pill red">Needs attention</span>
+                    {% elif sub.status == "review" %}
+                        <span class="pill yellow">Review</span>
+                    {% else %}
+                        <span class="pill green">On track</span>
+                    {% endif %}
+                </td>
+                <td>{{ sub.note }}</td>
+                <td>
+    <form method="POST" action="/delete">
+        <input type="hidden" name="name" value="{{ sub.name }}">
+        <button class="delete-btn" title="Delete after stopping autopay">
+            🗑️
+        </button>
+    </form>
+</td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <footer>
+        Keeping subscriptions organized, one place at a time.
+    </footer>
+
+</div>
+
+</body>
+</html>

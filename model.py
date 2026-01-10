@@ -3,7 +3,17 @@ from datetime import datetime
 
 def analyze_subscriptions(csv_path):
     df = pd.read_csv(csv_path)
-    
+
+    # Handle empty CSV (VERY IMPORTANT)
+    if df.empty:
+        return (
+            df,
+            0,
+            "No upcoming bills",
+            0,
+            0
+        )
+
     today = pd.to_datetime(datetime.today().date())
     df["next_billing"] = pd.to_datetime(df["next_billing"])
 
@@ -35,12 +45,12 @@ def analyze_subscriptions(csv_path):
     # Top insights
     total_spend = round(df["cost"].sum(), 2)
 
-    next_billing_date = (
-        df[df["days_left"] >= 0]
-        .sort_values("days_left")
-        .iloc[0]["next_billing"]
-        .strftime("%d %b %Y")
-    )
+    upcoming = df[df["days_left"] >= 0].sort_values("days_left")
+
+    if len(upcoming) > 0:
+        next_billing_date = upcoming.iloc[0]["next_billing"].strftime("%d %b %Y")
+    else:
+        next_billing_date = "No upcoming bills"
 
     needs_attention_count = (df["status"] == "needs-attention").sum()
     low_usage_count = (df["usage_feel"] == "low").sum()

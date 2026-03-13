@@ -337,4 +337,168 @@ tr:hover .bar {
 }
 
 
+.search-box{
+width:100%;
+padding:10px;
+margin:15px 0;
+border-radius:6px;
+border:1px solid #ddd;
+}
+.timeline{
+list-style:none;
+padding:0;
+margin-top:15px;
+}
 
+.timeline li{
+padding:10px;
+border-left:3px solid #5c7cfa;
+margin-bottom:10px;
+background:#f8f9ff;
+}
+
+
+
+
+
+.navbar{
+display:flex;
+justify-content:space-between;
+padding:15px 40px;
+background:#5c7cfa;
+color:white;
+}
+
+.nav-links a{
+color:white;
+margin-left:20px;
+text-decoration:none;
+}
+.budget-progress{
+width:100%;
+height:10px;
+background:#e0e0e0;
+border-radius:10px;
+margin-top:10px;
+overflow:hidden;
+}
+
+.budget-bar{
+height:100%;
+background:#5c7cfa;
+border-radius:10px;
+transition:0.5s;
+}
+.budget-bar.over{
+background:#ff4d4d;
+}
+.tips{
+list-style:none;
+padding:0;
+margin-top:10px;
+}
+
+.tips li{
+background:#f5f7ff;
+padding:10px;
+margin-bottom:8px;
+border-left:4px solid #5c7cfa;
+border-radius:6px;
+}
+.timeline li{
+background:#1f1f1f;
+color:white;
+padding:10px;
+margin-bottom:10px;
+border-left:3px solid #5c7cfa;
+border-radius:6px;
+}
+.tips li{
+background:#1f1f1f;
+color:white;
+padding:10px;
+margin-bottom:8px;
+border-left:4px solid #5c7cfa;
+border-radius:6px;
+}
+
+.budget-progress{
+background:#2a2a2a;
+}
+.dash-card:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+transition:0.3s;
+}
+.timeline{
+list-style:none;
+padding:0;
+margin-top:15px;
+}
+
+.timeline li{
+background:#f5f7ff;
+color:#333;
+padding:10px;
+margin-bottom:10px;
+border-left:4px solid #5c7cfa;
+border-radius:6px;
+}
+.tips{
+list-style:none;
+padding:0;
+margin-top:10px;
+}
+
+.tips li{
+background:#f5f7ff;
+color:#333;
+padding:10px;
+margin-bottom:8px;
+border-left:4px solid #5c7cfa;
+border-radius:6px;
+}
+.table-controls{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+gap:10px;
+flex-wrap:wrap;
+}
+
+#searchInput{
+flex:1;
+padding:10px 14px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:14px;
+transition:0.2s;
+}
+
+#searchInput:focus{
+outline:none;
+border-color:#5c7cfa;
+box-shadow:0 0 0 2px rgba(92,124,250,0.15);
+}
+
+.sort-buttons{
+display:flex;
+gap:10px;
+}
+
+.sort-buttons button{
+padding:8px 14px;
+border:none;
+border-radius:8px;
+background:#5c7cfa;
+color:white;
+font-size:13px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.sort-buttons button:hover{
+background:#4b66d1;
+transform:translateY(-1px);
+}

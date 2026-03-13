@@ -1,167 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>SubTrack – Subscription Tracking & Management System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
 
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<title>SubTrack – Subscription Tracking & Management System</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="icon" type="image/png"
+href="{{ url_for('static', filename='images/logo.png') }}">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
+
+
 <body>
+
 
 <!-- HERO -->
 <section class="hero">
-    <div class="hero-left">
-        <h1>SubTrack</h1>
-        <p class="hero-tagline">Track all your subscriptions in one place</p>
-        <p class="hero-desc">
-            Stay aware of upcoming billing dates and manage subscriptions effortlessly.
-        </p>
-    </div>
 
-    <div class="hero-right">
-        <div class="floating-card"><i class="fa-solid fa-calendar-week"></i> Billing reminders</div>
-        <div class="floating-card"><i class="fa-regular fa-credit-card"></i> Monthly spend</div>
-        <div class="floating-card">📊 Subscription overview</div>
-    </div>
+<div class="hero-left">
+
+<h1>SubTrack</h1>
+
+<p class="hero-tagline">Track all your subscriptions in one place</p>
+
+<p class="hero-desc">
+Stay aware of upcoming billing dates and manage subscriptions effortlessly.
+</p>
+
+</div>
+
+
+<div class="hero-right">
+
+<div class="floating-card">
+<i class="fa-solid fa-calendar-week"></i> Billing reminders
+</div>
+
+<div class="floating-card">
+<i class="fa-regular fa-credit-card"></i> Monthly spend
+</div>
+
+<div class="floating-card">
+📊 Subscription overview
+</div>
+
+</div>
+
 </section>
+
 
 <div class="container">
 
-    <!-- DASHBOARD -->
-    <div class="dashboard">
-        <div class="dash-card blue">
-            <span><img src="../static/images/calendar.png" alt="calendar" width="20px"></span>
-            <h3>Next Billing</h3>
-            <p>{{ next_billing }}</p>
-        </div>
 
-        <div class="dash-card green">
-            <span><img src="../static/images/money.png" alt="calendar" width="20px"></span>
-            <h3>Total Spend</h3>
-            <p>₹{{ total_spend }}</p>
-        </div>
+<!-- DASHBOARD -->
 
-        
+<div class="dashboard">
 
-        <div class="dash-card purple">
-            <span><img src="../static/images/usage.png" alt="calendar" width="20px"></span>
-            <h3>Low Usage</h3>
-            <p>{{ low_usage }}</p>
-        </div>
-    </div>
-
-    <!-- ADD -->
-    <div class="glass-card">
-        <h2> Add another subscription</h2>
-        <form method="POST" action="/add" class="form">
-            <input type="text" name="name" placeholder="Netflix, Spotify…" required>
-            <input type="number" name="cost" placeholder="Monthly cost (₹)" required>
-<div class="input-group">
-    <label>Next billing date</label>
-    <div class="date-wrapper">
-        <input type="date" name="next_billing" required>
-        
-    </div>
+<div class="dash-card blue">
+<span><img src="{{ url_for('static', filename='images/calendar.png') }}" width="20"></span>
+<h3>Next Billing</h3>
+<p>{{ next_billing }}</p>
 </div>
 
-            <select name="usage_feel" required>
-                <option value="">How has your usage been?</option>
-                <option value="high">Used a lot</option>
-                <option value="medium">Used occasionally</option>
-                <option value="low">Barely / not used</option>
-            </select>
 
-            <button>Add subscription</button>
-        </form>
-    </div>
+<div class="dash-card green">
+<span><img src="{{ url_for('static', filename='images/money.png') }}" width="20"></span>
+<h3>Total Spend</h3>
+<p>₹{{ total_spend }}</p>
+</div>
+<div class="dash-card red">
+<span>⚠</span>
+<h3>Budget Status</h3>
+<p>
+{% if total_spend > 2000 %}
+Exceeded ₹{{ total_spend - 2000 }}
+{% else %}
+₹{{ 2000 - total_spend }} remaining
+{% endif %}
+</p>
+</div>
 
-    <!-- TABLE -->
-    <div class="glass-card">
-        <h2><img src="../static/images/subscription.png"width="20px" alt=""> Your subscriptions</h2>
+<div class="dash-card orange">
+<span>🤖</span>
+<h3>Predicted Spend</h3>
+<p>₹{{ prediction }}</p>
+</div>
 
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Cost</th>
-                <th>Next Billing</th>
-                <th>Status</th>
-                <th>Notes</th>
-                <th>Delete</th>
-            </tr>
 
-            {% if subscriptions|length == 0 %}
-            <tr>
-                <td colspan="5">
-                    <div class="empty-state">
-                        📭 No subscriptions yet
-                        <span>Add one to start tracking</span>
-                    </div>
-                </td>
-            </tr>
-            {% endif %}
+<div class="dash-card purple">
+<span><img src="{{ url_for('static', filename='images/usage.png') }}" width="20"></span>
+<h3>Low Usage</h3>
+<p>{{ low_usage }}</p>
+</div>
+<div class="dash-card cyan">
+<span>📦</span>
+<h3>Active Subscriptions</h3>
+<p>{{ subscriptions|length }}</p>
+</div>
+</div>
 
-            {% for sub in subscriptions %}
-            <tr>
-                <td>{{ sub.name }}</td>
-                <td>₹{{ sub.cost }}</td>
-                <td>
-                    {{ sub.next_billing }}
 
-                    <div class="time-hint">
-                        {% if sub.days_left <= 5 %}
-                             Very soon
-                        {% elif sub.days_left <= 10 %}
-                             Coming up
-                        {% else %}
-                             Later
-                        {% endif %}
-                    </div>
 
-                    <div class="progress">
-                        <div class="bar
-                            {% if sub.days_left <= 5 %}
-                                urgent
-                            {% elif sub.days_left <= 10 %}
-                                warning
-                            {% else %}
-                                safe
-                            {% endif %}
-                        "></div>
-                    </div>
-                </td>
-                <td>
-                    {% if sub.status == "needs-attention" %}
-                        <span class="pill red">Needs attention</span>
-                    {% elif sub.status == "review" %}
-                        <span class="pill yellow">Review</span>
-                    {% else %}
-                        <span class="pill green">On track</span>
-                    {% endif %}
-                </td>
-                <td>{{ sub.note }}</td>
-                <td>
-    <form method="POST" action="/delete">
-        <input type="hidden" name="name" value="{{ sub.name }}">
-        <button class="delete-btn" title="Delete after stopping autopay">
-            🗑️
-        </button>
-    </form>
+<!-- INSIGHTS PANEL -->
+
+<div class="glass-card insights">
+
+<h2>Insights</h2>
+
+{% if needs_attention > 0 %}
+<p>⚠ {{ needs_attention }} subscription(s) need attention soon.</p>
+{% endif %}
+
+{% if low_usage > 0 %}
+<p>💡 {{ low_usage }} subscription(s) show low usage.</p>
+{% endif %}
+
+{% if total_spend > 2000 %}
+<p>📊 Your subscription spending is above ₹2000 this month.</p>
+{% endif %}
+
+</div>
+<div class="glass-card">
+
+<h3>Budget Usage</h3>
+
+<p>₹{{ total_spend }} spent of ₹2000 budget</p>
+
+<div class="budget-progress">
+<div class="budget-bar 
+{% if total_spend > 2000 %}over{% endif %}"
+style="width: {{ (total_spend/2000)*100 }}%"></div>
+</div>
+
+</div>
+<div class="glass-card">
+<h2>Upcoming Renewals</h2>
+
+<ul class="timeline">
+
+{% for sub in subscriptions|sort(attribute="days_left") %}
+
+<li>
+<strong>{{ sub.days_left }} days</strong> → {{ sub.name }}
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+<div class="glass-card">
+
+<h2>💡 Smart Tips</h2>
+
+{% if suggestions|length == 0 %}
+
+<p>No recommendations right now.</p>
+
+{% else %}
+
+<ul class="tips">
+
+{% for tip in suggestions %}
+<li>Consider cancelling <strong>{{ tip }}</strong> to save money.</li>
+{% endfor %}
+
+</ul>
+
+{% endif %}
+
+</div>
+<!-- BAR CHART -->
+
+<div class="glass-card">
+
+<h2>Subscription Cost Breakdown</h2>
+
+<canvas id="spendChart"></canvas>
+
+</div>
+
+
+
+<!-- PIE CHART -->
+
+<div class="glass-card">
+
+<h2>Spending by Category</h2>
+
+<canvas id="categoryChart"></canvas>
+
+</div>
+
+
+
+<!-- ADD SUBSCRIPTION -->
+
+<div class="glass-card">
+
+<h2>Add another subscription</h2>
+
+<form method="POST" action="/add" class="form">
+
+<input type="text" name="name" placeholder="Netflix, Spotify…" required>
+
+<input type="number" name="cost" placeholder="Monthly cost (₹)" required>
+
+
+<div class="input-group">
+
+<label>Next billing date</label>
+
+<div class="date-wrapper">
+<input type="date" name="next_billing" required>
+</div>
+
+</div>
+
+
+<select name="usage_feel" required>
+
+<option value="">How has your usage been?</option>
+
+<option value="high">Used a lot</option>
+
+<option value="medium">Used occasionally</option>
+
+<option value="low">Barely / not used</option>
+
+</select>
+
+
+<button type="submit">Add subscription</button>
+
+</form>
+
+</div>
+
+
+
+<!-- SUBSCRIPTIONS TABLE -->
+
+<div class="glass-card">
+
+<h2>
+<img src="{{ url_for('static', filename='images/subscription.png') }}" width="20">
+Your subscriptions
+</h2>
+
+<div class="table-controls">
+
+<input type="text" id="searchInput" placeholder=" Search subscriptions...">
+
+<div class="sort-buttons">
+
+<button onclick="sortBilling()"> Sort by Billing</button>
+
+<button onclick="sortCost()"> Sort by Cost</button>
+
+</div>
+
+</div>
+
+<table>
+
+<tr>
+<th>Name</th>
+<th>Cost</th>
+<th>Next Billing</th>
+<th>Status</th>
+<th>Notes</th>
+<th>Delete</th>
+</tr>
+
+
+{% if subscriptions|length == 0 %}
+
+<tr>
+<td colspan="6">
+
+<div class="empty-state">
+📭 No subscriptions yet
+<span>Add one to start tracking</span>
+</div>
+
+</td>
+</tr>
+
+{% endif %}
+
+
+{% for sub in subscriptions %}
+
+<tr>
+
+<td>{{ sub.name }}</td>
+
+<td>₹{{ sub.cost }}</td>
+
+
+<td>
+
+{{ sub.next_billing }}
+
+<div class="time-hint">
+
+{% if sub.days_left <= 5 %}
+Very soon
+{% elif sub.days_left <= 10 %}
+Coming up
+{% else %}
+Later
+{% endif %}
+
+</div>
+
+
+<div class="progress">
+
+<div class="bar
+{% if sub.days_left <= 5 %}
+urgent
+{% elif sub.days_left <= 10 %}
+warning
+{% else %}
+safe
+{% endif %}
+"></div>
+
+</div>
+
 </td>
 
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
 
-    <footer>
-        Keeping subscriptions organized, one place at a time.
-    </footer>
+<td>
+
+{% if sub.status == "needs-attention" %}
+<span class="pill red">Needs attention</span>
+
+{% elif sub.status == "review" %}
+<span class="pill yellow">Review</span>
+
+{% else %}
+<span class="pill green">On track</span>
+
+{% endif %}
+
+</td>
+
+
+<td>{{ sub.note }}</td>
+
+
+<td>
+
+<form method="POST" action="/delete">
+
+<input type="hidden" name="name" value="{{ sub.name }}">
+
+<button class="delete-btn">🗑️</button>
+
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
 
 </div>
+
+
+<footer>
+Keeping subscriptions organized, one place at a time.
+</footer>
+
+
+</div>
+
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded",function(){
+
+const labels = {{ subscriptions | map(attribute='name') | list | tojson }};
+const data = {{ subscriptions | map(attribute='cost') | list | tojson }};
+
+if(labels.length>0){
+
+new Chart(document.getElementById("spendChart"),{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Monthly Cost (₹)",
+data:data,
+backgroundColor:"#5c7cfa"
+}]
+},
+
+options:{
+responsive:true,
+plugins:{legend:{display:false}}
+}
+
+});
+
+}
+
+const categoryLabels = {{ category_spend.keys() | list | tojson }};
+const categoryData = {{ category_spend.values() | list | tojson }};
+
+if(categoryLabels.length>0){
+
+new Chart(document.getElementById("categoryChart"),{
+
+type:"pie",
+
+data:{
+labels:categoryLabels,
+datasets:[{
+data:categoryData
+}]
+}
+
+});
+
+}
+
+
+document.getElementById("searchInput").addEventListener("keyup",function(){
+
+let filter = this.value.toLowerCase()
+
+let rows = document.querySelectorAll("table tr")
+
+rows.forEach((row,i)=>{
+
+if(i===0) return
+
+let text = row.innerText.toLowerCase()
+
+row.style.display = text.includes(filter) ? "" : "none"
+
+})
+
+})
+
+})
+
+function sortBilling(){
+
+let table = document.querySelector("table")
+let rows = Array.from(table.rows).slice(1)
+
+rows.sort((a,b)=>{
+
+let dateA = new Date(a.cells[2].innerText)
+let dateB = new Date(b.cells[2].innerText)
+
+return dateA - dateB
+
+})
+
+rows.forEach(row=>table.appendChild(row))
+
+}
+
+
+function sortCost(){
+
+let table = document.querySelector("table")
+let rows = Array.from(table.rows).slice(1)
+
+rows.sort((a,b)=>{
+
+let costA = parseFloat(a.cells[1].innerText.replace("₹",""))
+let costB = parseFloat(b.cells[1].innerText.replace("₹",""))
+
+return costB - costA
+
+})
+
+rows.forEach(row=>table.appendChild(row))
+
+}
+</script>
+
 
 </body>
 </html>

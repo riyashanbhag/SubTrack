@@ -1,26 +1,25 @@
 import pandas as pd
 from datetime import datetime
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
 
 def analyze_subscriptions(csv_path):
+
     df = pd.read_csv(csv_path)
 
-    # Handle empty CSV (VERY IMPORTANT)
+    # If CSV has no rows
     if df.empty:
-        return (
-            df,
-            0,
-            "No upcoming bills",
-            0,
-            0
-        )
+        return df, 0, "No upcoming bills", 0, 0, [], {}, {}
 
     today = pd.to_datetime(datetime.today().date())
+
     df["next_billing"] = pd.to_datetime(df["next_billing"])
 
-    # Days left until billing
     df["days_left"] = (df["next_billing"] - today).dt.days
 
-    # Status logic (calm, management-focused)
+
+    # STATUS LOGIC
     def status(row):
         if row["days_left"] <= 5 and row["usage_feel"] == "low":
             return "needs-attention"
@@ -31,10 +30,11 @@ def analyze_subscriptions(csv_path):
 
     df["status"] = df.apply(status, axis=1)
 
-    # Notes for clarity
+
+    # NOTE LOGIC
     def note(row):
         if row["status"] == "needs-attention":
-            return "Billing soon with low recent usage"
+            return "Billing soon with low usage"
         elif row["status"] == "review":
             return "Billing approaching"
         else:
@@ -42,23 +42,77 @@ def analyze_subscriptions(csv_path):
 
     df["note"] = df.apply(note, axis=1)
 
-    # Top insights
+
+    # TOTAL SPEND
     total_spend = round(df["cost"].sum(), 2)
 
+
+    # NEXT BILLING DATE
     upcoming = df[df["days_left"] >= 0].sort_values("days_left")
 
     if len(upcoming) > 0:
-        next_billing_date = upcoming.iloc[0]["next_billing"].strftime("%d %b %Y")
+        next_billing = upcoming.iloc[0]["next_billing"].strftime("%d %b %Y")
     else:
-        next_billing_date = "No upcoming bills"
+        next_billing = "No upcoming bills"
 
-    needs_attention_count = (df["status"] == "needs-attention").sum()
-    low_usage_count = (df["usage_feel"] == "low").sum()
+
+    # COUNTS
+    needs_attention = (df["status"] == "needs-attention").sum()
+
+    low_usage = (df["usage_feel"] == "low").sum()
+
+
+    # SMART SUGGESTIONS
+    suggestions = []
+
+    for _, row in df.iterrows():
+        if row["usage_feel"] == "low":
+            suggestions.append(row["name"])
+
+
+    # MONTHLY SPEND
+    df["month"] = df["next_billing"].dt.month
+
+    monthly_spend = df.groupby("month")["cost"].sum().to_dict()
+
+
+    # CATEGORY SPEND
+    if "category" in df.columns:
+        category_spend = df.groupby("category")["cost"].sum().to_dict()
+    else:
+        category_spend = {}
+
 
     return (
         df,
         total_spend,
-        next_billing_date,
-        needs_attention_count,
-        low_usage_count
+        next_billing,
+        needs_attention,
+        low_usage,
+        suggestions,
+        monthly_spend,
+        category_spend
     )
+
+
+def predict_spend(df):
+
+    # Not enough data
+    if len(df) < 2:
+        return round(df["cost"].sum(), 2)
+
+    df["month"] = df["next_billing"].dt.month
+
+    monthly = df.groupby("month")["cost"].sum().reset_index()
+
+    X = monthly["month"].values.reshape(-1, 1)
+    y = monthly["cost"].values
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    next_month = np.array([[monthly["month"].max() + 1]])
+
+    prediction = model.predict(next_month)
+
+    return round(prediction[0], 2)
